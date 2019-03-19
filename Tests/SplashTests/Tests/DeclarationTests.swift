@@ -150,6 +150,33 @@ final class DeclarationTests: SyntaxHighlighterTestCase {
         ])
     }
 
+    func testGenericFunctionDeclarationWithGenericParameter() {
+        let components = highlighter.highlight("func value<T>(at keyPath: KeyPath<Element, T>) -> T? {}")
+
+        XCTAssertEqual(components, [
+            .token("func", .keyword),
+            .whitespace(" "),
+            .plainText("value<T>(at"),
+            .whitespace(" "),
+            .plainText("keyPath:"),
+            .whitespace(" "),
+            .token("KeyPath", .type),
+            .plainText("<"),
+            .token("Element", .type),
+            .plainText(","),
+            .whitespace(" "),
+            .token("T", .type),
+            .plainText(">)"),
+            .whitespace(" "),
+            .plainText("->"),
+            .whitespace(" "),
+            .token("T", .type),
+            .plainText("?"),
+            .whitespace(" "),
+            .plainText("{}")
+        ])
+    }
+
     func testGenericStructDeclaration() {
         let components = highlighter.highlight("struct MyStruct<A: Hello, B> {}")
 
@@ -409,6 +436,37 @@ final class DeclarationTests: SyntaxHighlighterTestCase {
             .plainText("}")
         ])
     }
+    
+    func testDynamicPropertyDeclaration() {
+        let components = highlighter.highlight("""
+        class Hello {
+            @objc dynamic var property = 0
+        }
+        """)
+        
+        XCTAssertEqual(components, [
+            .token("class", .keyword),
+            .whitespace(" "),
+            .plainText("Hello"),
+            .whitespace(" "),
+            .plainText("{"),
+            .whitespace("\n    "),
+            .token("@objc", .keyword),
+            .whitespace(" "),
+            .token("dynamic", .keyword),
+            .whitespace(" "),
+            .token("var", .keyword),
+            .whitespace(" "),
+            .plainText("property"),
+            .whitespace(" "),
+            .plainText("="),
+            .whitespace(" "),
+            .token("0", .number),
+            .whitespace("\n"),
+            .plainText("}")
+        ])
+    }
+
 
     func testGenericPropertyDeclaration() {
         let components = highlighter.highlight("class Hello { var array: Array<String> = [] }")
@@ -567,10 +625,10 @@ final class DeclarationTests: SyntaxHighlighterTestCase {
             .plainText("}")
         ])
     }
-    
+
     func testDeferDeclaration() {
         let components = highlighter.highlight("func hello() { defer {} }")
-        
+
         XCTAssertEqual(components, [
             .token("func", .keyword),
             .whitespace(" "),
@@ -585,10 +643,10 @@ final class DeclarationTests: SyntaxHighlighterTestCase {
             .plainText("}")
         ])
     }
-        
+
     func testFunctionDeclarationWithInOutParameter() {
         let components = highlighter.highlight("func swapValues(value1: inout Int, value2: inout Int) { }")
-        
+
         XCTAssertEqual(components, [
             .token("func", .keyword),
             .whitespace(" "),
@@ -604,7 +662,7 @@ final class DeclarationTests: SyntaxHighlighterTestCase {
             .token("inout", .keyword),
             .whitespace(" "),
             .token("Int", .type),
-			.plainText(")"),
+            .plainText(")"),
             .whitespace(" "),
             .plainText("{"),
             .whitespace(" "),
@@ -691,6 +749,68 @@ final class DeclarationTests: SyntaxHighlighterTestCase {
         ])
     }
 
+    func testNonMutatingFunction() {
+        let components = highlighter.highlight("""
+        struct MyStruct {
+            nonmutating func doNotChangeState() { }
+        }
+        """)
+
+        XCTAssertEqual(components, [
+            .token("struct", .keyword),
+            .whitespace(" "),
+            .plainText("MyStruct"),
+            .whitespace(" "),
+            .plainText("{"),
+            .whitespace("\n    "),
+            .token("nonmutating", .keyword),
+            .whitespace(" "),
+            .token("func", .keyword),
+            .whitespace(" "),
+            .plainText("doNotChangeState()"),
+            .whitespace(" "),
+            .plainText("{"),
+            .whitespace(" "),
+            .plainText("}"),
+            .whitespace("\n"),
+            .plainText("}")
+        ])
+    }
+
+    func testRethrowingFunctionDeclaration() {
+        let components = highlighter.highlight("""
+        func map<T>(_ transform: (Element) throws -> T) rethrows -> [T]
+        """)
+
+        XCTAssertEqual(components, [
+            .token("func", .keyword),
+            .whitespace(" "),
+            .plainText("map<T>("),
+            .token("_", .keyword),
+            .whitespace(" "),
+            .plainText("transform:"),
+            .whitespace(" "),
+            .plainText("("),
+            .token("Element", .type),
+            .plainText(")"),
+            .whitespace(" "),
+            .token("throws", .keyword),
+            .whitespace(" "),
+            .plainText("->"),
+            .whitespace(" "),
+            .token("T", .type),
+            .plainText(")"),
+            .whitespace(" "),
+            .token("rethrows", .keyword),
+            .whitespace(" "),
+            .plainText("->"),
+            .whitespace(" "),
+            .plainText("["),
+            .token("T", .type),
+            .plainText("]")
+        ])
+    }
+
     func testIndirectEnumDeclaration() {
         let components = highlighter.highlight("""
         indirect enum Content {
@@ -740,6 +860,7 @@ extension DeclarationTests {
             ("testGenericFunctionDeclarationWithoutConstraints", testGenericFunctionDeclarationWithoutConstraints),
             ("testGenericFunctionDeclarationWithSingleConstraint", testGenericFunctionDeclarationWithSingleConstraint),
             ("testGenericFunctionDeclarationWithMultipleConstraints", testGenericFunctionDeclarationWithMultipleConstraints),
+            ("testGenericFunctionDeclarationWithGenericParameter", testGenericFunctionDeclarationWithGenericParameter),
             ("testGenericStructDeclaration", testGenericStructDeclaration),
             ("testClassDeclaration", testClassDeclaration),
             ("testCompactClassDeclarationWithInitializer", testCompactClassDeclarationWithInitializer),
@@ -751,6 +872,7 @@ extension DeclarationTests {
             ("testExtensionDeclaration", testExtensionDeclaration),
             ("testExtensionDeclarationWithConstraint", testExtensionDeclarationWithConstraint),
             ("testLazyPropertyDeclaration", testLazyPropertyDeclaration),
+            ("testDynamicPropertyDeclaration", testDynamicPropertyDeclaration),
             ("testGenericPropertyDeclaration", testGenericPropertyDeclaration),
             ("testPropertyDeclarationWithWillSet", testPropertyDeclarationWithWillSet),
             ("testPropertyDeclarationWithDidSet", testPropertyDeclarationWithDidSet),
@@ -761,6 +883,8 @@ extension DeclarationTests {
             ("testFunctionDeclarationWithNonEscapedKeywordAsName", testFunctionDeclarationWithNonEscapedKeywordAsName),
             ("testFunctionDeclarationWithEscapedKeywordAsName", testFunctionDeclarationWithEscapedKeywordAsName),
             ("testFunctionDeclarationWithPreProcessors", testFunctionDeclarationWithPreProcessors),
+            ("testNonMutatingFunction", testNonMutatingFunction),
+            ("testRethrowingFunctionDeclaration", testRethrowingFunctionDeclaration),
             ("testIndirectEnumDeclaration", testIndirectEnumDeclaration)
         ]
     }

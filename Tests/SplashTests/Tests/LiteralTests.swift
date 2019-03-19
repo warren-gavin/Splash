@@ -76,6 +76,30 @@ final class LiteralTests: SyntaxHighlighterTestCase {
         ])
     }
 
+    func testStringLiteralWithCustomIterpolation() {
+        let components = highlighter.highlight("""
+        "Hello \\(label: a, b) world \\(label: call())"
+        """)
+
+        XCTAssertEqual(components, [
+            .token("\"Hello", .string),
+            .whitespace(" "),
+            .plainText("\\(label:"),
+            .whitespace(" "),
+            .plainText("a,"),
+            .whitespace(" "),
+            .plainText("b)"),
+            .whitespace(" "),
+            .token("world", .string),
+            .whitespace(" "),
+            .plainText("\\(label:"),
+            .whitespace(" "),
+            .token("call", .call),
+            .plainText("())"),
+            .token("\"", .string)
+        ])
+    }
+
     func testMultiLineStringLiteral() {
         let components = highlighter.highlight("""
         let string = \"\"\"
@@ -97,6 +121,59 @@ final class LiteralTests: SyntaxHighlighterTestCase {
             .plainText("\\(variable)"),
             .whitespace("\n"),
             .token("\"\"\"", .string)
+        ])
+    }
+
+    func testSingleLineRawStringLiteral() {
+        let components = highlighter.highlight("""
+        #"A raw string \\(withoutInterpolation) yes"#
+        """)
+
+        XCTAssertEqual(components, [
+            .token("#\"A", .string),
+            .whitespace(" "),
+            .token("raw", .string),
+            .whitespace(" "),
+            .token("string", .string),
+            .whitespace(" "),
+            .token("\\(withoutInterpolation)", .string),
+            .whitespace(" "),
+            .token("yes\"#", .string)
+        ])
+    }
+
+    func testMultiLineRawStringLiteral() {
+        let components = highlighter.highlight("""
+        #\"\"\"
+        A raw string \\(withoutInterpolation)
+        with multiple lines. #" Nested "#
+        \"\"\"#
+        """)
+
+        XCTAssertEqual(components, [
+            .token("#\"\"\"", .string),
+            .whitespace("\n"),
+            .token("A", .string),
+            .whitespace(" "),
+            .token("raw", .string),
+            .whitespace(" "),
+            .token("string", .string),
+            .whitespace(" "),
+            .token("\\(withoutInterpolation)", .string),
+            .whitespace("\n"),
+            .token("with", .string),
+            .whitespace(" "),
+            .token("multiple", .string),
+            .whitespace(" "),
+            .token("lines.", .string),
+            .whitespace(" "),
+            .token("#\"", .string),
+            .whitespace(" "),
+            .token("Nested", .string),
+            .whitespace(" "),
+            .token("\"#", .string),
+            .whitespace("\n"),
+            .token("\"\"\"#", .string)
         ])
     }
 
@@ -128,6 +205,24 @@ final class LiteralTests: SyntaxHighlighterTestCase {
         ])
     }
 
+    func testKeyPathLiteral() {
+        let components = highlighter.highlight("let value = object[keyPath: \\.property]")
+
+        XCTAssertEqual(components, [
+            .token("let", .keyword),
+            .whitespace(" "),
+            .plainText("value"),
+            .whitespace(" "),
+            .plainText("="),
+            .whitespace(" "),
+            .plainText("object[keyPath:"),
+            .whitespace(" "),
+            .plainText("\\."),
+            .token("property", .property),
+            .plainText("]")
+        ])
+    }
+
     func testAllTestsRunOnLinux() {
         XCTAssertTrue(TestCaseVerifier.verifyLinuxTests((type(of: self)).allTests))
     }
@@ -141,9 +236,13 @@ extension LiteralTests {
             ("testStringLiteralWithEscapedQuote", testStringLiteralWithEscapedQuote),
             ("testStringLiteralWithAttribute", testStringLiteralWithAttribute),
             ("testStringLiteralInterpolation", testStringLiteralInterpolation),
+            ("testStringLiteralWithCustomIterpolation", testStringLiteralWithCustomIterpolation),
             ("testMultiLineStringLiteral", testMultiLineStringLiteral),
+            ("testSingleLineRawStringLiteral", testSingleLineRawStringLiteral),
+            ("testMultiLineRawStringLiteral", testMultiLineRawStringLiteral),
             ("testDoubleLiteral", testDoubleLiteral),
-            ("testIntegerLiteralWithSeparators", testIntegerLiteralWithSeparators)
+            ("testIntegerLiteralWithSeparators", testIntegerLiteralWithSeparators),
+            ("testKeyPathLiteral", testKeyPathLiteral)
         ]
     }
 }

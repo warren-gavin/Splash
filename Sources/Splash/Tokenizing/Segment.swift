@@ -27,7 +27,7 @@ public extension Segment {
         /// All tokens that have been found so far (excluding the current one)
         public var all: [String]
         /// The number of times a given token has been found up until this point
-        public var counts: [String : Int]
+        public var counts: [String: Int]
         /// The tokens that were previously found on the same line as the current one
         public var onSameLine: [String]
         /// The token that was previously found (may be on a different line)
@@ -44,11 +44,5 @@ public extension Segment.Tokens {
     /// This is a convenience API over the `counts` dictionary.
     func count(of token: String) -> Int {
         return counts[token] ?? 0
-    }
-
-    /// Return whether an equal number of occurrences have been found of two tokens.
-    /// For example, this can be used to check if a token is encapsulated by parenthesis.
-    func containsBalancedOccurrences(of tokenA: String, and tokenB: String) -> Bool {
-        return count(of: tokenA) == count(of: tokenB)
     }
 }
